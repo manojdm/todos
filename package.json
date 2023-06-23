@@ -1,20 +1,30 @@
 {
-  "name": "todos",
+  "name": "test",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "api": "node ./pages/api/graphql.js"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.16",
+    "@prisma/client": "^4.16.0",
     "@types/node": "20.3.1",
     "@types/react": "18.2.13",
     "@types/react-dom": "18.2.6",
-    "next": "13.4.7",
+    "apollo-server-micro": "2.25.0",
+    "autoprefixer": "10.4.14",
+    "graphql": "^16.7.0",
+    "graphql-playground-middleware-lambda": "^1.7.24",
+    "graphql-request": "^6.1.0",
+    "next": "13.4.6",
+    "postcss": "8.4.24",
+    "prisma": "^4.16.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "tailwindcss": "3.3.2",
     "typescript": "5.1.3"
   }
 }
