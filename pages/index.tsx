@@ -1,58 +1,29 @@
-import { useQuery, useMutation, gql } from '@apollo/client';
-
-
-const GET_TODOS_QUERY = gql`
-  query GetTodos {
-    todos {
-      id
-      title
-      completed
-    }
-  }
-`;
-
-const CREATE_TODO_MUTATION = gql`
-  mutation CreateTodoMutation($title: String!) {
-    createTodo(title: $title) {
-      id
-      title
-      completed
-    }
-  }
-`;
+import image from "../images/pomodoro-working.gif"
+import Image from "next/image";
 
 export default function Home() {
-  const { loading, error, data } = useQuery(GET_TODOS_QUERY);
-  const [createTodo] = useMutation(CREATE_TODO_MUTATION);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-
-  const handleCreateTodo = async () => {
-    const title = prompt('Enter a todo title');
-    if (title) {
-      try {
-        await createTodo({
-          variables: { title },
-          refetchQueries: [{ query: GET_TODOS_QUERY }],
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
 
   return (
-    <div>
-      <h1>Todos</h1>
-      <button onClick={handleCreateTodo}>Create Todo</button>
-      <ul>
-        {data.todos.map((todo: any) => (
-          <li key={todo.id}>
-            {todo.title} - {todo.completed ? 'Completed' : 'Incomplete'}
-          </li>
-        ))}
-      </ul>
+    <div className="home-section card">
+        <div className="home-image">
+            <Image 
+                src={image}
+                width={500}
+                height={500}
+                alt="sample image"
+            />
+        </div>
+        <div className="home-content">
+            <div className="title">
+                Manage tasks easily using pomodoro technique
+            </div>
+            <div className="description">
+                Supercharge your productivity with Pomodoro Pro. Stay focused, manage tasks, and achieve more in timed work sessions and refreshing breaks.
+            </div>
+            <div className="btn-cta">
+                <a href="#">Try Now!!</a>
+            </div>
+        </div>
     </div>
   );
 }

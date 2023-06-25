@@ -24,6 +24,9 @@ const typeDefs = gql`
   type Query {
     todos: [Todo!]!
     user: [User!]!
+    todo(
+      id: ID!
+    ): Todo!
   }
 
   type Mutation {
@@ -66,6 +69,16 @@ const resolvers = {
         return users;
       } catch (error) {
         throw new Error("Failed to fetch users");
+      }
+    },
+    todo: async (_, { id }) => {
+      try {
+        const todo = await prisma.todo.findUnique({
+          where: { id: parseInt(id) },
+        });
+        return todo;
+      } catch (error) {
+        throw new Error("Failed to fetch the todo.");
       }
     },
   },
