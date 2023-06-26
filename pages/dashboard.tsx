@@ -1,6 +1,7 @@
 import React from 'react'
 import { ApolloClient, InMemoryCache, useQuery, gql, useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 // Set up Apollo Client
 const client = new ApolloClient({
@@ -43,7 +44,7 @@ const todos = () => {
         );
     }
 
-    const todos = data.todos;
+    const todos = data?.todos;
 
     const handleView = (id: string | number) => {
         router.push(`/todo/${id}`)
@@ -71,7 +72,12 @@ const todos = () => {
     
   return (
     <div className="todos-section card">
-    <div className="title">Todos !!</div>
+    <div className="todos-header">
+        <div className="title">Todos !!</div>
+        <div className="create-todos-btn">
+            <Link href='/new'>+ new todo</Link>
+        </div>
+    </div>
     <div className="todos-container">
         <div className="todo-cards">
             {!loading && todos.map((todo: any) => (
