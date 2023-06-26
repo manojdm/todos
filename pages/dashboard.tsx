@@ -109,6 +109,7 @@ const todos = () => {
                 </div>
             </div>
         ))}
+        {!loading && todos.length === 0 && <div className="no-todos title">No todos found</div>}
         </div>
     </div>
 </div>

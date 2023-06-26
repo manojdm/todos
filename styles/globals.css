@@ -252,6 +252,12 @@
     color: rgb(212, 131, 131);
 }
 
+.todos-container .no-todos {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 1.1rem !important;
+}
+
 /* Todo PAGE */
 .todo-section {
     flex-direction: column;
