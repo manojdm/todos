@@ -20,7 +20,6 @@
     align-items: center;
     justify-content: center;
     background: #fff;
-
 }
 
 .container .card .title {
@@ -271,6 +270,19 @@
 }
 
 /* Timer */
+.todo-section .todo-timer {
+    border: 1px solid black;
+    padding: 16px 24px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+}
+
+.todo-section .todo-timer .timer-status {
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgb(140, 140, 73);
+}
+
 .todo-section .todo-timer .count {
     font-size: 4rem;
 }
@@ -280,6 +292,8 @@
     align-items: center;
     justify-content: space-between;
     margin: 0px 0px 48px;
+    max-width: 72px;
+    margin: auto;
 }
 
 .todo-section .todo-timer .timer-actions .pause {
@@ -290,6 +304,17 @@
 .todo-section .todo-timer .timer-actions .stop {
     color: rgb(237, 149, 42);
     cursor: pointer;
+}
+
+.todo-section .todo-timer .timer-actions .reset {
+    color: rgb(237, 52, 42);
+    cursor: pointer;
+}
+
+.todo-section .todo-timer .message {
+    font-size: 0.8rem;
+    margin-top: 16px;
+    color: rgb(176, 176, 176);
 }
 
 .todo-section .todo-content .todo-details i {
@@ -347,6 +372,11 @@ img {
     width: 100%;
     height: 100%;
 }
+
+.card {
+    margin-top: 48px;
+}
+
 
 /* Nav Bar*/
 .container .home-nav-bar nav {
