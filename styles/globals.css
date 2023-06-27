@@ -154,6 +154,37 @@
     padding: 16px;
 }
 
+.container .todos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 560px;
+    padding: 0px 16px;
+}
+
+.container .todos-header .title {
+    margin: 0;
+}
+
+.container .todos-header .create-todos-btn {
+    padding: 8px 16px;
+    border: 1px solid black;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.container .todos-header .create-todos-btn a ,
+.container .todos-header .create-todos-btn Link {
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: #222;
+}
+
+.container .todos-header .create-todos-btn:hover {
+    background: rgb(245, 242, 242);
+}
+
 .container .todos-container .todo-card {
     display: flex;
     align-items: center;
@@ -219,6 +250,12 @@
 
 .todos-container .todo-card .todo-actions .action.delete {
     color: rgb(212, 131, 131);
+}
+
+.todos-container .no-todos {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 1.1rem !important;
 }
 
 /* Todo PAGE */

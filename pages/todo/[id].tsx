@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useSearchParams } from 'next/navigation'
-import { ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql, useMutation } from '@apollo/client';
+import timerFunction from '../scripts/timer'
 
 // Set up Apollo Client
 const client = new ApolloClient({
@@ -10,6 +11,10 @@ const client = new ApolloClient({
 });
 
 const Todo = () => {
+    //refs
+    const startTodoBtn = useRef<HTMLDivElement | null>(null);
+    const timer = useRef<HTMLDivElement | null>(null)
+
     //get query id
     const router = useRouter();
     const id = router.query.id;
@@ -17,7 +22,6 @@ const Todo = () => {
     //get search params
     const params = useSearchParams();
     const type = params.get('type')
-    console.log(type)
 
     //Query
     const GET_TODO = gql`
@@ -33,7 +37,22 @@ const Todo = () => {
     }
     `;
 
-    const {loading, error, data} = useQuery(GET_TODO);
+    const UPDATE_TODO = gql`
+    mutation UpdateTodo($id: ID!, $completed: Boolean!) {
+      updateTodo(id: $id, completed: $completed) {
+        id
+        name
+        completed
+        description
+        dueDate
+        tomatoesConsumed
+      }
+    }
+  `;
+  
+  
+    const {loading, error, data, refetch} = useQuery(GET_TODO);
+    const [updateTodo] = useMutation(UPDATE_TODO);
 
     if(loading){
         return('Loading...');
@@ -45,14 +64,44 @@ const Todo = () => {
 
     const todo = data.todo;
 
+    //Mark complete Event listener
+    const handleMarkComplete = async (e:any, id: string | number) => {
+        e.preventDefault();
+
+        try {
+          const { data } = await updateTodo({
+            variables: {
+              id: String(id), // Convert id to string
+              completed: true,
+            },
+          });
+      
+          if (data.updateTodo.completed) {
+            refetch();
+          }
+        } catch (e: any) {
+          return 'Issue with marking the todo complete';
+        }
+      };
+      
+      useEffect(() => {
+        if(startTodoBtn.current) {
+            //Event listener
+            startTodoBtn.current.addEventListener('click', () => {
+                console.log('wow')
+            })
+        }
+
+      }, [])
+
   return (
 <div className="todo-section card">
     {!loading && data ? <>
-    <div className="todo-start">
+<div ref={startTodoBtn} className="todo-start">
     Start Todo
 </div>
-<div className="todo-timer hide">
-<div className="count">
+<div ref={timer} className="todo-timer hide">
+<div className="count timer">
     <span className="minutes">25</span> : <span className="seconds">00</span>
 </div>
 <div className="timer-actions">
@@ -91,9 +140,10 @@ Todo: {todo.name}
             <div className="form-div form-cta update hide">
                 <input type="submit" value="update" disabled={type == 'edit' ? false : true} />
             </div>
+            {!todo.completed ?
             <div className="form-div form-cta complete">
-                <input className="complete" type="submit" value="mark complete" disabled={type == 'edit' ? false : true} />
-            </div>
+                <input onClick={(e) => handleMarkComplete(e, todo.id)} className="complete" type="submit" value="mark complete" />
+            </div>: ''}
         </form>
     </div>
 </div>
