@@ -9,6 +9,29 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+function showNotification(message: string) {
+    if (!("Notification" in window)) {
+      alert("This browser does not support desktop notification");
+    } else if (Notification.permission === "granted") {
+      const notification = new Notification(message);
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          const notification = new Notification(message);
+        } else if (permission === "denied") {
+          alert("Please enable notifications to receive task updates!!");
+        }
+      });
+    }
+}
+
+function requestPermission() {
+    if(Notification.permission == "denied"){
+        alert("Please enable notifications to receive task updates!!");
+        Notification.requestPermission();
+    }
+}
+
 const Todo = () => {
   // refs
   const startTodoBtn = useRef<HTMLDivElement | null>(null);
@@ -76,9 +99,11 @@ const Todo = () => {
           setTomatoesConsumed((prev) => prev+1)
           setMinutes(bmaxMinutes);
           setCurrent('break');
+          showNotification('Focus time has been ended. you can have 5 minutes of break or click on complete the task to mark complete');
         } else {
           setMinutes(pmaxMinutes);
           setCurrent('pomodoro');
+          showNotification('Break time has been ended. Please have 25 minutes of focus time or click complete the task to mark complete');
         }
       } else {
         setMinutes((prevMinutes) => prevMinutes - 1);
@@ -92,6 +117,8 @@ const Todo = () => {
   
 
   useEffect(() => {
+    requestPermission();
+
     let interval: any;
   
     if (running) {
@@ -100,7 +127,7 @@ const Todo = () => {
         pause.current.style.display = 'block';
       }
   
-      interval = setInterval(timerFunction, 10);
+      interval = setInterval(timerFunction, 1000);
     } else {
       if (pause.current && play.current) {
         pause.current.style.display = 'none';
@@ -154,6 +181,7 @@ const Todo = () => {
       timer.current.style.display = 'block';
       setRunning(true);
     }
+    showNotification('Pomodoro started!!')
   };
 
   const handlePause = () => {
