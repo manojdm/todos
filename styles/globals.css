@@ -40,9 +40,12 @@
     justify-content: space-between;
 }
 
-.container .home-nav-bar nav .title {
+.container .home-nav-bar nav .title,
+.container .home-nav-bar nav .title a {
     font-size: 1.3rem;
     font-weight: 400;
+    text-decoration: none;
+    color: #222;
 }
 
 .container .home-nav-bar nav .nav-items ul {
