@@ -24,8 +24,9 @@ const typeDefs = gql`
 	type Query {
 		todos: [Todo!]!
 		user: [User!]!
-		todo(id: ID!): Todo!
+		todo(id: ID!, userId: ID!): Todo!
 		getTodos(userId: ID!): [Todo!]!
+		checkUser(username: String!, email: String!): User
 	}
 
 	type Mutation {
@@ -39,8 +40,6 @@ const typeDefs = gql`
 		updateTodo(id: ID!, completed: Boolean, tomatoesConsumed: Int): Todo!
 
 		deleteTodo(id: ID!): Boolean
-
-		checkUser(username: String!, email: String!): User
 	}
 `;
 
@@ -66,10 +65,10 @@ const resolvers = {
 				throw new Error("Failed to fetch users");
 			}
 		},
-		todo: async (_, { id }) => {
+		todo: async (_, { id, userId }) => {
 			try {
-				const todo = await prisma.todo.findUnique({
-					where: { id: parseInt(id) },
+				const todo = await prisma.todo.findFirst({
+					where: { id: parseInt(id), userId: parseInt(userId) },
 				});
 				return todo;
 			} catch (error) {
@@ -86,6 +85,31 @@ const resolvers = {
 				return todos;
 			} catch (error) {
 				throw new Error("Failed to fetch todos");
+			}
+		},
+		checkUser: async (_, args) => {
+			const { username, email } = args;
+			try {
+				const user = await prisma.user.findFirst({
+					where: {
+						email,
+					},
+				});
+
+				if (user) {
+					return user;
+				} else {
+					const createdUser = await prisma.user.create({
+						data: {
+							username,
+							email,
+						},
+					});
+
+					return createdUser;
+				}
+			} catch (error) {
+				throw new Error("Failed to check user");
 			}
 		},
 	},
@@ -127,31 +151,6 @@ const resolvers = {
 				return true;
 			} catch (error) {
 				throw new Error("Failed to delete todo");
-			}
-		},
-		checkUser: async (_, args) => {
-			const { username, email } = args;
-			try {
-				const user = await prisma.user.findFirst({
-					where: {
-						email,
-					},
-				});
-
-				if (user) {
-					return user;
-				} else {
-					const createdUser = await prisma.user.create({
-						data: {
-							username,
-							email,
-						},
-					});
-
-					return createdUser;
-				}
-			} catch (error) {
-				throw new Error("Failed to check user");
 			}
 		},
 	},
