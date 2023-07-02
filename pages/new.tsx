@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ApolloClient, InMemoryCache, gql, useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 // Set up Apollo Client
 const client = new ApolloClient({
@@ -33,6 +34,15 @@ const NewTodo = () => {
     const [createTodo] = useMutation(CREATE_TODO_MUTATION);
 
     const router = useRouter();
+
+    const { user, error: userError, isLoading } = useUser();
+
+    useEffect(() => {
+        
+        if((!isLoading && !user) || (!isLoading && !user?.email) || (!isLoading && user == undefined)){
+            router.push('/login')
+        }
+    }, [isLoading])  
 
     const handleCreateTodo = async (e: any) => {
         e.preventDefault();
