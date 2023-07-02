@@ -55,26 +55,11 @@ const todos = () => {
 
     //user data
     let userData: any;
-    let userId;
-
+    
     //router
     const router = useRouter();
 
     const { user, error: userError, isLoading } = useUser();
-
-    const check = async () => {
-        if (!isLoading && user) {
-            userData = await checkUser({
-                variables: {
-                  username: user.nickname,
-                  email: user.email,
-                },
-                refetchQueries: [{ query: GET_TODOS_LIST, variables: { userId: userData?.data?.checkUser?.id } }],
-            });
-
-            userId = userData.data.checkUser.id;
-        }
-    };
 
     useEffect(() => {
         
@@ -82,9 +67,17 @@ const todos = () => {
             router.push('/login')
         }
 
-        check();
 
-    }, [isLoading, userData , userId])  
+    }, [isLoading, userData])  
+
+    const {data: checkUser}: any = useMutation(CHECK_USER, {
+      variables: {
+        username: user?.nickname,
+        email: user?.email
+      }
+    })
+
+    const userId = checkUser?.checkUser?.id
 
     // Todos data
     const { loading, error, data, refetch } = useQuery(GET_TODOS_LIST_BY_ID, {
@@ -95,9 +88,6 @@ const todos = () => {
 
     //delete query
     const [deleteTodo] = useMutation(DELETE_TODO);
-
-    //check user query
-    const [checkUser] = useMutation(CHECK_USER)
 
     if(loading){
         return (
