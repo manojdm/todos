@@ -1,14 +1,35 @@
-import React, { use, useEffect } from "react";
-import {
-	ApolloClient,
-	InMemoryCache,
-	useQuery,
-	gql,
-	useMutation,
-} from "@apollo/client";
+import React, { useEffect, useState } from "react";
+import { ApolloClient, InMemoryCache, useQuery, gql } from "@apollo/client";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
+	ArcElement,
+	PointElement,
+	LineElement,
+} from "chart.js";
+import { Bar, Pie, Line } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { todo } from "node:test";
+
+//setup chart
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
+	ArcElement,
+	PointElement,
+	LineElement
+);
 
 // Set up Apollo Client
 const client = new ApolloClient({
@@ -17,18 +38,6 @@ const client = new ApolloClient({
 });
 
 //Query
-const GET_TODOS_LIST = gql`
-	{
-		todos {
-			id
-			name
-			description
-			completed
-			dueDate
-		}
-	}
-`;
-
 const GET_TODOS_LIST_BY_ID = gql`
 	query GetTodos($userId: ID!) {
 		getTodos(userId: $userId) {
@@ -37,15 +46,11 @@ const GET_TODOS_LIST_BY_ID = gql`
 			description
 			completed
 			dueDate
+			tomatoesConsumed
 		}
 	}
 `;
 
-const DELETE_TODO = gql`
-	mutation DeleteTodo($id: ID!) {
-		deleteTodo(id: $id)
-	}
-`;
 const CHECK_USER = gql`
 	query checkUser($username: String!, $email: String!) {
 		checkUser(username: $username, email: $email) {
@@ -59,6 +64,8 @@ const CHECK_USER = gql`
 const todos = () => {
 	//user data
 	let userData: any;
+	const [totalCompleted, setTotalCompleted] = useState(0);
+	const [totalNotCompleted, setTotalNotCompleted] = useState(0);
 
 	//router
 	const router = useRouter();
@@ -85,94 +92,134 @@ const todos = () => {
 	const userId = checkUser?.checkUser?.id;
 
 	// Todos data
-	const { loading, error, data, refetch } = useQuery(GET_TODOS_LIST_BY_ID, {
+	const { loading, error, data } = useQuery(GET_TODOS_LIST_BY_ID, {
 		variables: {
 			userId: userId,
 		},
 		skip: !userId,
 	});
 
-	//delete query
-	const [deleteTodo] = useMutation(DELETE_TODO);
+	const todos = data?.getTodos;
+
+	useEffect(() => {
+		if (todos && todos.length > 0) {
+			console.log(todos);
+			todos.forEach((todo: any) => {
+				if (todo.completed) {
+					setTotalCompleted(prev => prev + 1);
+				} else {
+					setTotalNotCompleted(prev => prev + 1);
+				}
+			});
+		}
+	}, [todos]);
 
 	if (loading) {
 		return <div className="title">Loading.....</div>;
 	}
 
-	const todos = data?.getTodos;
-
-	const handleView = (id: string | number) => {
-		router.push(`/todo/${id}`);
-	};
-
-	const handleEdit = (id: string | number) => {
-		router.push(`/todo/${id}?type=edit`);
-	};
-
-	const handleDelete = async (id: string | number) => {
-		try {
-			const { data } = await deleteTodo({
-				variables: {
-					id,
-				},
-			});
-
-			alert("Successfully deleted the todo");
-
-			refetch();
-		} catch (e: any) {
-			return "Issue with creating the todo";
-		}
-	};
+	if (error) {
+		return "Todo not found...";
+	}
 
 	return (
-		<div className="todos-section card">
+		<div className="todos-section card stats">
 			<div className="todos-header">
-				<div className="title">Todos !!</div>
-				<div className="create-todos-btn">
-					<Link href="/new">+ new todo</Link>
-				</div>
+				<div className="title">Stats</div>
 			</div>
 			<div className="todos-container">
 				<div className="todo-cards">
-					{data?.getTodos && data.getTodos.length > 0 ? (
-						data.getTodos.map((todo: any) => (
-							<div className="todo-card" key={todo.id}>
-								<div className="todo-details">
-									<div className="todo-created">{todo.dueDate}</div>
-									<div className="todo-name">{todo.name}</div>
+					{data?.getTodos && data.getTodos.length && (
+						<div className="stats-container">
+							<div className="stat line-chart">
+								<div className="stat-name">
+									Total tomatoes consumed for each task
 								</div>
-								<div className="todo-status">
-									{todo.completed ? (
-										<div className="status completed">completed</div>
-									) : (
-										<div className="status in-progress">In progress</div>
-									)}
-								</div>
-								<div className="todo-actions">
-									<div
-										onClick={() => handleView(todo.id)}
-										className="action view"
-									>
-										<i className="fa-solid fa-eye"></i>
-									</div>
-									<div
-										onClick={() => handleEdit(todo.id)}
-										className="action edit"
-									>
-										<i className="fa-solid fa-pen-to-square"></i>
-									</div>
-									<div
-										onClick={() => handleDelete(todo.id)}
-										className="action delete"
-									>
-										<i className="fa-solid fa-trash"></i>
-									</div>
+								<div className="chart">
+									<Line
+										data={{
+											labels: todos.map((todo: any) => todo.name),
+											datasets: [
+												{
+													label: "Tomatoes consumed",
+													data: todos.map((todo: any) => todo.tomatoesConsumed),
+													borderColor: "rgb(53, 162, 235)",
+													backgroundColor: "rgba(53, 162, 235, 0.5)",
+												},
+											],
+										}}
+										options={{
+											scales: {
+												x: {
+													type: "category",
+												},
+												y: {
+													beginAtZero: true,
+													ticks: {
+														stepSize: 1,
+													},
+												},
+											},
+										}}
+									/>
 								</div>
 							</div>
-						))
-					) : (
-						<div className="no-todos title">No todos found</div>
+							<div className="stat bar">
+								<div className="stat-title">Total tasks (Bar chart view):</div>
+								<div className="chart">
+									<Bar
+										data={{
+											labels: ["completed", "not completed"],
+											datasets: [
+												{
+													label: "Total todos",
+													data: [totalCompleted, totalNotCompleted],
+													backgroundColor: "gray",
+												},
+											],
+										}}
+										options={{
+											scales: {
+												x: {
+													type: "category",
+												},
+												y: {
+													beginAtZero: true,
+													ticks: {
+														stepSize: 1,
+													},
+												},
+											},
+										}}
+									/>
+								</div>
+							</div>
+							<div className="stat pie-chart">
+								<div className="stat-title">Total tasks (Pie chart view):</div>
+								<div className="chart">
+									<Pie
+										data={{
+											labels: ["completed", "not completed"],
+											datasets: [
+												{
+													label: "Total todos",
+													data: [totalCompleted, totalNotCompleted],
+													backgroundColor: [
+														"rgba(75, 192, 192, 0.2)",
+														"rgba(255, 99, 132, 0.2)",
+													],
+													borderColor: [
+														"rgba(75, 192, 192, 1)",
+														"rgba(255, 99, 132, 1)",
+													],
+													borderWidth: 1,
+												},
+											],
+										}}
+									/>
+								</div>
+							</div>
+						</div>
 					)}
 				</div>
 			</div>
