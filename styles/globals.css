@@ -369,6 +369,37 @@
     transform: scale(1.1);
 }
 
+/* Stats */
+.container .todos-section.stats {
+    display: block;
+    max-width: 800px;
+    margin: auto;
+}
+
+.container .todos-section.stats .todos-header,
+.container .todos-section.stats .todos-container {
+    max-width: 100%;
+}
+
+.container .todos-section.stats .todos-header .title {
+    font-size: 1.6rem;
+    margin: 32px 0px;
+}
+
+.container .todos-section .stats-container .stat {
+    margin: 0px 0px 48px;
+}
+
+.container .todos-section .stats-container .stat .chart {
+    max-width: 540px;
+    margin: auto;
+    margin-top: 16px;
+}
+
+.container .todos-section .stats-container .stat.pie-chart .chart {
+    max-width: 360px;
+}
+
 @media (max-width: 728px) {
 
 img {
