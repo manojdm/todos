@@ -1,9 +1,30 @@
 import { ApolloServer, gql } from "apollo-server-micro";
 import { PrismaClient } from "@prisma/client";
+const { GraphQLScalarType } = require('graphql');
+const { Kind } = require('graphql/language');
+
+const JSONScalar = new GraphQLScalarType({
+  name: 'JSON',
+  description: 'JSON scalar type',
+  parseValue(value) {
+    return JSON.parse(value);
+  },
+  serialize(value) {
+    return JSON.stringify(value);
+  },
+  parseLiteral(ast) {
+    if (ast.kind === Kind.STRING) {
+      return JSON.parse(ast.value);
+    }
+    return null;
+  },
+});
 
 const prisma = new PrismaClient();
 
 const typeDefs = gql`
+	scalar JSON
+
 	type User {
 		id: ID!
 		username: String!
@@ -19,6 +40,7 @@ const typeDefs = gql`
 		dueDate: String!
 		tomatoesConsumed: Int!
 		userId: ID!
+		customFields: JSON
 	}
 
 	type Query {
@@ -35,15 +57,22 @@ const typeDefs = gql`
 			description: String!
 			dueDate: String!
 			userId: ID!
+			customFields: JSON
 		): Todo!
 
-		updateTodo(id: ID!, completed: Boolean, tomatoesConsumed: Int): Todo!
+		updateTodo(
+			id: ID!
+			completed: Boolean
+			tomatoesConsumed: Int
+			customFields: JSON
+		): Todo!
 
 		deleteTodo(id: ID!): Boolean
 	}
 `;
 
 const resolvers = {
+	JSON: JSONScalar,
 	Query: {
 		todos: async () => {
 			try {
@@ -115,7 +144,7 @@ const resolvers = {
 	},
 	Mutation: {
 		createTodo: async (_, args) => {
-			const { name, userId, description, dueDate } = args;
+			const { name, userId, description, dueDate, customFields } = args;
 			try {
 				const todo = await prisma.todo.create({
 					data: {
@@ -123,6 +152,7 @@ const resolvers = {
 						completed: false,
 						description,
 						dueDate,
+						customFields: JSON.stringify(customFields),
 						tomatoesConsumed: 0,
 						userId: parseInt(userId),
 					},
@@ -133,11 +163,11 @@ const resolvers = {
 			}
 		},
 		updateTodo: async (_, args) => {
-			const { id, completed, tomatoesConsumed } = args;
+			const { id, completed, tomatoesConsumed, customFields } = args;
 			try {
 				const updatedTodo = await prisma.todo.update({
 					where: { id: parseInt(id) },
-					data: { completed, tomatoesConsumed },
+					data: { completed, tomatoesConsumed, customFields},
 				});
 				return updatedTodo;
 			} catch (error) {
