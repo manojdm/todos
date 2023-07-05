@@ -1,24 +1,7 @@
 import { ApolloServer, gql } from "apollo-server-micro";
 import { PrismaClient } from "@prisma/client";
-const { GraphQLScalarType } = require('graphql');
-const { Kind } = require('graphql/language');
+import { GraphQLJSON } from 'graphql-scalars';
 
-const JSONScalar = new GraphQLScalarType({
-  name: 'JSON',
-  description: 'JSON scalar type',
-  parseValue(value) {
-    return JSON.parse(value);
-  },
-  serialize(value) {
-    return JSON.stringify(value);
-  },
-  parseLiteral(ast) {
-    if (ast.kind === Kind.STRING) {
-      return JSON.parse(ast.value);
-    }
-    return null;
-  },
-});
 
 const prisma = new PrismaClient();
 
@@ -72,7 +55,7 @@ const typeDefs = gql`
 `;
 
 const resolvers = {
-	JSON: JSONScalar,
+	JSON: GraphQLJSON,
 	Query: {
 		todos: async () => {
 			try {
