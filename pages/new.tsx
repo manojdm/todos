@@ -53,6 +53,8 @@ const NewTodo = () => {
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [date, setDate] = useState("");
+	const [keys, setKeys] = useState("");
+	const [values, setValues] = useState("");
 
 	const [createTodo] = useMutation(CREATE_TODO_MUTATION);
 
@@ -138,6 +140,13 @@ const NewTodo = () => {
 										value={date}
 										onChange={e => setDate(e.target.value)}
 									/>
+								</div>
+								<div className="form-div custom-fields">
+									<label>Custom Fields</label>
+									<div className="field">
+										<textarea placeholder="key" className="semi-div keys" />
+										<textarea placeholder="value" className="semi-div values" />
+									</div>
 								</div>
 								<div className="form-div form-cta update">
 									<input type="submit" value="Create Todo" />
