@@ -145,6 +145,15 @@
     font-size: 0.9rem;
 }
 
+.keys {
+    margin-right: 16px;
+    height: 120px;
+}
+
+.values {
+    height: 120px;
+}
+
 /* Todos Lists */
 .container .todos-section {
     flex-direction: column;
