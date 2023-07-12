@@ -21,12 +21,14 @@ const CREATE_TODO_MUTATION = gql`
 		$description: String!
 		$dueDate: String!
 		$userId: ID!
+		$customFields: JSON
 	) {
 		createTodo(
 			name: $name
 			description: $description
 			dueDate: $dueDate
 			userId: $userId
+			customFields: $customFields
 		) {
 			id
 			name
@@ -84,13 +86,28 @@ const NewTodo = () => {
 	const handleCreateTodo = async (e: any) => {
 		e.preventDefault();
 
+		let customFields: { [key: string]: string } = {};
+
 		try {
+
+			const keyArray: String[] = keys.split('\n');
+			const valueArray: String[] = values.split('\n');
+			const len = keyArray.length;
+
+
+			console.log(keyArray)
+
+			for(let i=0; i<len; i++){
+				customFields = { ...customFields, [String(keyArray[i])]: String(valueArray[i]) };
+			}
+
 			const { data } = await createTodo({
 				variables: {
 					name: title,
 					description,
 					dueDate: date,
 					userId: userId,
+					customFields
 				},
 			});
 
@@ -144,8 +161,8 @@ const NewTodo = () => {
 								<div className="form-div custom-fields">
 									<label>Custom Fields</label>
 									<div className="field">
-										<textarea placeholder="key" className="semi-div keys" />
-										<textarea placeholder="value" className="semi-div values" />
+										<textarea onChange={(e) => setKeys(e.target.value)} placeholder="key" className="semi-div keys" />
+										<textarea onChange={(e) => setValues(e.target.value)} placeholder="value" className="semi-div values" />
 									</div>
 								</div>
 								<div className="form-div form-cta update">

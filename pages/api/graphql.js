@@ -48,6 +48,9 @@ const typeDefs = gql`
 			completed: Boolean
 			tomatoesConsumed: Int
 			customFields: JSON
+			name: String
+			description: String
+			dueDate: String,
 		): Todo!
 
 		deleteTodo(id: ID!): Boolean
@@ -135,7 +138,7 @@ const resolvers = {
 						completed: false,
 						description,
 						dueDate,
-						customFields: JSON.stringify(customFields),
+						customFields: customFields,
 						tomatoesConsumed: 0,
 						userId: parseInt(userId),
 					},
@@ -146,11 +149,11 @@ const resolvers = {
 			}
 		},
 		updateTodo: async (_, args) => {
-			const { id, completed, tomatoesConsumed, customFields } = args;
+			const { id, completed, tomatoesConsumed, customFields, name, description, dueDate } = args;
 			try {
 				const updatedTodo = await prisma.todo.update({
 					where: { id: parseInt(id) },
-					data: { completed, tomatoesConsumed, customFields},
+					data: { completed, tomatoesConsumed, customFields, name, description, dueDate},
 				});
 				return updatedTodo;
 			} catch (error) {
