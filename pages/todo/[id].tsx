@@ -49,16 +49,21 @@ const GET_TODO = gql`
 			completed
 			dueDate
 			tomatoesConsumed
+			customFields
 		}
 	}
 `;
 
 const UPDATE_TODO = gql`
-	mutation UpdateTodo($id: ID!, $completed: Boolean!, $tomatoesConsumed: Int!) {
+	mutation UpdateTodo($id: ID!, $completed: Boolean, $tomatoesConsumed: Int, $customFields: JSON, $name: String, $description: String, $dueDate: String) {
 		updateTodo(
 			id: $id
 			completed: $completed
 			tomatoesConsumed: $tomatoesConsumed
+			customFields: $customFields
+			name: $name
+			description: $description
+			dueDate: $dueDate
 		) {
 			id
 			name
@@ -96,6 +101,12 @@ const Todo = () => {
 
 	//Tomatoes consumed
 	const [tomatoesConsumed, setTomatoesConsumed] = useState(0);
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
+	const [date, setDate] = useState("");
+	const [keys, setKeys] = useState("");
+	const [values, setValues] = useState("");
+	const [fields, setFields] = useState(null)
 
 	// current state
 	const [current, setCurrent] = useState<"pomodoro" | "break">("pomodoro");
@@ -191,6 +202,21 @@ const Todo = () => {
 		};
 	}, [running, minutes, seconds]);
 
+	const todo = data?.todo;
+
+	useEffect(() => {
+		if(!loading && data){
+			setTitle(todo?.name);
+			setDescription(todo?.description);
+			setDate(todo?.dueDate);
+
+			//updating custom fields
+			setFields(todo?.customFields);
+			setKeys((Object.keys(todo?.customFields)).join('\n'))
+			setValues((Object.values(todo?.customFields)).join('\n'))
+		}
+	}, [loading, data])
+
 	if (loading) {
 		return "Loading...";
 	}
@@ -199,18 +225,33 @@ const Todo = () => {
 		return "Todo not found...";
 	}
 
-	const todo = data.todo;
 
 	// Mark complete Event listener
-	const handleMarkComplete = async (e: any, id: string | number) => {
+	const handleUpdateTodo = async (e: any, id: string | number) => {
 		e.preventDefault();
 
+		let customFields: { [key: string]: string } = {};
+
 		try {
+			const keyArray: String[] = keys.split('\n');
+			const valueArray: String[] = values.split('\n');
+			const len = keyArray.length;
+
+
+			console.log(keyArray)
+
+			for(let i=0; i<len; i++){
+				customFields = { ...customFields, [String(keyArray[i])]: String(valueArray[i]) };
+			}
+
 			const { data } = await updateTodo({
 				variables: {
 					id: String(id), // Convert id to string
-					completed: true,
 					tomatoesConsumed,
+					customFields,
+					name: title,
+					description,
+					dueDate: date
 				},
 			});
 
@@ -246,11 +287,12 @@ const Todo = () => {
 		setTomatoesConsumed(0);
 	};
 
+
 	return (
 		<div className="todo-section card">
 			{!loading && data ? (
 				<>
-					<div className="title">Todo: {todo.name}</div>
+					<div className="title">Todo: {title}</div>
 					{!todo.completed && (
 						<>
 							<div
@@ -294,7 +336,7 @@ const Todo = () => {
 									</div>
 									<div className="stop">
 										<i
-											onClick={e => handleMarkComplete(e, todo.id)}
+											onClick={e => handleUpdateTodo(e, todo.id)}
 											ref={stop}
 											className="fa-solid fa-stop"
 										></i>
@@ -320,7 +362,8 @@ const Todo = () => {
 										<input
 											className="title-input"
 											type="text"
-											value={todo.name}
+											value={title}
+											onChange={(e) => setTitle(e.target.value)}
 											disabled={type === "edit" ? false : true}
 										/>
 									</div>
@@ -329,7 +372,8 @@ const Todo = () => {
 										<input
 											className="description-input"
 											type="text"
-											value={todo.description}
+											value={description}
+											onChange={(e) => setDescription(e.target.value)}
 											disabled={type === "edit" ? false : true}
 										/>
 									</div>
@@ -338,7 +382,8 @@ const Todo = () => {
 										<input
 											type="date"
 											className="duedate"
-											value={todo.dueDate}
+											value={date}
+											onChange={(e) => setDate(e.target.value)}
 											disabled={type === "edit" ? false : true}
 										/>
 									</div>
@@ -349,13 +394,20 @@ const Todo = () => {
 											disabled={type === "edit" ? false : true}
 										/>
 									</div>
+									<div className="form-div custom-fields">
+										<label>Custom Fields</label>
+										<div className="field">
+											<textarea value={keys} onChange={(e) => setKeys(e.target.value)} placeholder="key" className="semi-div keys" />
+											<textarea value={values} onChange={(e) => setValues(e.target.value)} placeholder="value" className="semi-div values" />
+										</div>
+									</div>
 									{!todo.completed ? (
 										<div className="form-div form-cta complete">
 											<input
-												onClick={e => handleMarkComplete(e, todo.id)}
+												onClick={e => handleUpdateTodo(e, todo.id)}
 												className="complete"
 												type="submit"
-												value="mark complete"
+												value="Update"
 											/>
 										</div>
 									) : (
