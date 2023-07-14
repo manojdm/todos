@@ -106,7 +106,8 @@ const Todo = () => {
 	const [date, setDate] = useState("");
 	const [keys, setKeys] = useState("");
 	const [values, setValues] = useState("");
-	const [fields, setFields] = useState(null)
+	const [fields, setFields] = useState(null);
+	const [completed, setCompleted] = useState(false);
 
 	// current state
 	const [current, setCurrent] = useState<"pomodoro" | "break">("pomodoro");
@@ -209,6 +210,7 @@ const Todo = () => {
 			setTitle(todo?.name);
 			setDescription(todo?.description);
 			setDate(todo?.dueDate);
+			setCompleted(todo?.completed);
 
 			//updating custom fields
 			setFields(todo?.customFields);
@@ -249,6 +251,7 @@ const Todo = () => {
 					id: String(id), // Convert id to string
 					tomatoesConsumed,
 					customFields,
+					completed,
 					name: title,
 					description,
 					dueDate: date
@@ -400,6 +403,16 @@ const Todo = () => {
 											<textarea value={keys} onChange={(e) => setKeys(e.target.value)} placeholder="key" className="semi-div keys" />
 											<textarea value={values} onChange={(e) => setValues(e.target.value)} placeholder="value" className="semi-div values" />
 										</div>
+									</div>
+									<div className="form-div todo-completed">
+										<label>Todo Completed ?</label>
+										<input
+											type="checkbox"
+											className="completed"
+											checked={completed}
+											onChange={(e) => setCompleted(e.target.checked)}
+											disabled={type === "edit" ? false : true}
+										/>
 									</div>
 									{!todo.completed ? (
 										<div className="form-div form-cta complete">
