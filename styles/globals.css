@@ -367,6 +367,17 @@
     border: none;
 }
 
+.todo-section .form-container .form-div.todo-completed {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.todo-section .form-container .form-div.todo-completed .completed {
+    width: fit-content;
+    margin-left: 8px;
+}
+
 .todo-section .todo-start {
     padding: 8px 12px;
     border: 1px solid black;
